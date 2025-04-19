@@ -14,10 +14,10 @@
   </head>
   <body>
     <header>
+      <a href="{{ url_for('home') }}" class="home-button">ホームに戻る</a>
       <h1>KartVision - 履歴</h1>
     </header>
     <div class="container">
-      <a href="{{ url_for('home') }}" class="back-button">ホームに戻る</a>
       <div class="date-list">
         {% for date in dates %}
         <div class="date-item" onclick="toggleImages('{{ date }}')">

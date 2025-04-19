@@ -140,7 +140,6 @@ def edit_points():
 # --- フラグ検出 & OCR 更新ループ ---
 def run_flag_detection(group_num, tag_positions):
     """
-    別スレッド上で、フラグ画像検出 → スクリーンショット取得 → OCR → チーム更新 を繰り返す
     tag_positions: 集計に使うタグの種類（例: ["prefix"] または ["prefix", "suffix"]）
     """
     flag_image = "src/kartvision/static/images/flag_trigger.png"

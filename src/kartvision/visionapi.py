@@ -10,61 +10,54 @@ class NotFoundResult(Exception):
 
 def confirm_lines_interactively(lines: List[str]) -> List[str]:
     """
-    行数が 12 でない場合、コンソール上でユーザーに補正を求めて
-    最終的に 12 行に整える関数。
+    行数が 12 でない場合、コンソール上でユーザーに補正を求め、最終的に 12 行に整える関数。
+    ※ 表示はすべて1から始まる番号で行い、内部操作は0-basedに変換する。
     """
-
     while len(lines) != 12:
         if len(lines) > 12:
-            # 行数が 12 を超えている → 余分な行を削除してもらう
+            # 行数が12を超えている → 余分な行を削除してもらう
             print("\n警告: 行数が 12 行より多い、余分な文字があるかもしれません。")
             print("現在の行一覧:")
-            for i, line in enumerate(lines):
-                print(f"{i}:{line}")
+            for i, line in enumerate(lines, start=1):
+                print(f"{i}: {line}")
             print(f"行数: {len(lines)} 行 (12 行に合わせる必要があります)")
-
-            # どの行を削除するかを入力
             idx_str = input(
                 "どれが余分ですか？(例: 1 だけなら '1', 複数なら '1,2' のようにカンマ区切りで) -> "
             )
             if not idx_str.strip():
-                # 何も指定しない場合は中断
                 print("キャンセルしました。")
                 break
             try:
-                # カンマ区切りをリストに
-                remove_indices = [int(x) for x in idx_str.split(",")]
-                remove_indices.sort(reverse=True)  # 後ろから消す
+                # ユーザー入力は1-basedなので、内部的に0-basedに変換する
+                remove_indices = [int(x) - 1 for x in idx_str.split(",")]
+                remove_indices.sort(reverse=True)
                 for idx in remove_indices:
                     if 0 <= idx < len(lines):
-                        print(f"削除: {idx}:{lines[idx]}")
+                        print(f"削除: {idx+1}:{lines[idx]}")
                         lines.pop(idx)
                     else:
-                        print(f"無効な行番号です: {idx}")
+                        print(f"無効な行番号です: {idx+1}")
             except ValueError:
                 print("行番号の指定が無効です。もう一度やり直してください。")
 
         elif len(lines) < 12:
-            # 行数が 12 未満 → 足りない行を追加してもらう
+            # 行数が12未満 → 足りない行を追加してもらう
             print("\n警告: 行数が 12 行未満、集計には不足している可能性があります。")
             print("現在の行一覧:")
-            for i, line in enumerate(lines):
-                print(f"{i}:{line}")
+            for i, line in enumerate(lines, start=1):
+                print(f"{i}: {line}")
             print(f"行数: {len(lines)} 行 (12 行に合わせる必要があります)")
-
-            # どこに行を挿入するか、何を挿入するか
             idx_str = input(
-                "どこが足りないですか？(追加したい行のインデックスを指定、末尾なら 'end') -> "
+                "どこが足りないですか？(追加したい行の位置を1から指定、12位を追加したいなら 'end') -> "
             )
             if not idx_str.strip():
                 print("キャンセルしました。")
                 break
-
             if idx_str.strip().lower() == "end":
                 insert_index = len(lines)
             else:
                 try:
-                    insert_index = int(idx_str)
+                    insert_index = int(idx_str) - 1
                     if insert_index < 0:
                         insert_index = 0
                     if insert_index > len(lines):
@@ -72,10 +65,8 @@ def confirm_lines_interactively(lines: List[str]) -> List[str]:
                 except ValueError:
                     print("無効な入力です。キャンセルします。")
                     break
-
-            new_tag = input("tagはなんですか？ -> ")
-            # 追加
-            print(f"{insert_index}番目に '{new_tag}' を追加します。")
+            new_tag = input("名前はなんですか？ -> ")
+            print(f"{insert_index+1} 番目に '{new_tag}' を追加します。")
             lines.insert(insert_index, new_tag)
 
     return lines
