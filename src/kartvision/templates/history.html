@@ -1,52 +1,86 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <title>KartVision - 履歴</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/history.css') }}"
-    />
-    <script
-      src="{{ url_for('static', filename='js/history.js') }}"
-      defer
-    ></script>
-  </head>
-  <body>
-    <header>
-      <a href="{{ url_for('home') }}" class="home-button">ホームに戻る</a>
-      <h1>KartVision - 履歴</h1>
-    </header>
-    <div class="container">
-      <div class="date-list">
-        {% for date in dates %}
-        <div class="date-item" onclick="toggleImages('{{ date }}')">
-          <div class="date-icon">📅</div>
-          <div class="date-text">
-            {{ date[:4] }}年{{ date[4:6]|int }}月{{ date[6:8]|int }}日
-          </div>
-        </div>
-        <div id="images-{{ date }}" class="hidden">
-          <div class="image-grid">
-            {% for image in images_by_date[date] %}
-            <div class="image-item">
-              <a href="{{ url_for('static', filename=image) }}" target="_blank">
-                <img
-                  src="{{ url_for('static', filename=image) }}"
-                  alt="Screenshot"
-                />
-              </a>
-              <div class="timestamp">
-                {{ image.split('_')[2].replace('.png', '')[:2] }}時{{
-                image.split('_')[2].replace('.png','')[2:4] }}分{{
-                image.split('_')[2].replace('.png','')[4:6] }}秒
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endfor %}
+
+<head>
+  <meta charset="UTF-8" />
+  <title>KartVision - 履歴</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}" />
+  <script src="{{ url_for('static', filename='js/history.js') }}" defer></script>
+</head>
+
+<body>
+  <header>
+    <a href="{{ url_for('home') }}" class="home-button">ホームに戻る</a>
+    <h1>KartVision - 履歴</h1>
+  </header>
+
+  <div class="container">
+    <!-- 日付範囲フィルター -->
+    <div class="date-filter">
+      <div class="filter-container">
+        <label for="date-from">期間: </label>
+        <input type="date" id="date-from" name="date-from">
+        <span>〜</span>
+        <input type="date" id="date-to" name="date-to">
+        <button id="apply-filter">適用</button>
+        <button id="reset-filter">リセット</button>
       </div>
     </div>
-  </body>
+
+    <div class="date-list">
+      {% for date in dates %}
+      <div class="date-item" data-date="{{ date }}" onclick="toggleImages('{{ date }}')">
+        <div class="date-icon">📅</div>
+        <div class="date-text">
+          {{ date[:4] }}年{{ date[4:6]|int }}月{{ date[6:8]|int }}日
+        </div>
+      </div>
+      <div id="images-{{ date }}" class="hidden">
+        <div class="image-grid">
+          {% for image in images_by_date[date] %}
+          {% set rel_path = image %} {# → 'history/screenshot_...png' #}
+
+          <div class="image-item" data-image="{{ rel_path }}">
+            <div class="image-wrapper"
+              onclick="openImageModal('{{ url_for('static', filename=rel_path) }}', '{{ loop.index0 }}', '{{ date }}')">
+              <img src="{{ url_for('static', filename=rel_path) }}" alt="Screenshot" />
+            </div>
+            <div class="timestamp">
+              {{ image.split('_')[2].replace('.png', '')[:2] }}時{{
+              image.split('_')[2].replace('.png','')[2:4] }}分{{
+              image.split('_')[2].replace('.png','')[4:6] }}秒
+            </div>
+            <button class="delete-btn" onclick="deleteImage(event, '{{ rel_path }}')">🗑️</button>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 画像モーダル -->
+  <div id="image-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeImageModal()">&times;</span>
+      <button id="prev-btn" class="nav-btn prev-btn">&#10094;</button>
+      <div class="modal-image-container">
+        <img id="modal-image" src="" alt="拡大画像">
+      </div>
+      <button id="next-btn" class="nav-btn next-btn">&#10095;</button>
+    </div>
+  </div>
+
+  <!-- 削除確認モーダル -->
+  <div id="confirm-modal" class="modal">
+    <div class="confirm-modal-content">
+      <p>この画像を削除してもよろしいですか？</p>
+      <div class="confirm-buttons">
+        <button id="confirm-delete">削除する</button>
+        <button id="cancel-delete">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</body>
+
 </html>

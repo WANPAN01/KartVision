@@ -14,7 +14,11 @@ wheels/
 
 # images
 history
-cashe
+cache
+trash
 
 # json
 config.json
+
+# logs
+deleted_images.log
